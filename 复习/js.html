@@ -1,0 +1,46 @@
+一、闭包及使用场景？
+
+定义： 可以访问其他函数作用域的函数就是闭包
+
+何时使用： 当你希望某些变量在函数执行后不被销毁，但是又怕设置成全局变量被污染，就可以使用闭包。
+使用场景： 防抖，节流
+
+二、浏览器的垃圾回收机制？
+
+当环境中内存泄露（无用的变量一直存在）时，浏览器的垃圾回收机制会清理这些变量
+方法： 标记清除法和计数法
+无法清除闭包造成的内存泄露
+
+三、Object.prototype.toString.call()作为安全的类型检测方法
+
+let a = "b" 
+let b = true 
+let c = '123'
+let d = 123 
+function e(){} 
+let f = undefined
+let g = null
+let h = /[a-z]/
+let i = {}
+let k = [1,2,3]
+
+Object.prototype.toString.call(a)   '[object String]'
+Object.prototype.toString.call(b)   '[object Boolean]'
+Object.prototype.toString.call(c)   '[object String]'
+Object.prototype.toString.call(d)   '[object Number]'
+Object.prototype.toString.call(e)   '[object Function]'
+Object.prototype.toString.call(f)   '[object Undefined]'
+Object.prototype.toString.call(g)   '[object Null]'
+Object.prototype.toString.call(h)   '[object RegExp]'
+Object.prototype.toString.call(i)   '[object Object]'
+Object.prototype.toString.call(k)   '[object Array]'
+
+去掉object
+const _toString = function(val) {
+    return Object.prototype.toString.call(val).slice(8,-1)
+}
+
+
+四、数组遍历map 与forEach的区别
+forEach、map、filter 无法跳出循环，
+for  for in  for of  可以跳出循环

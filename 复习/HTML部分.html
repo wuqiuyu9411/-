@@ -1,0 +1,131 @@
+一、HTML部分
+1、语义化标签的优点是什么?
+
+解：1、结构更清晰，更利于代码解读；
+    2、更利于搜索引擎优化，方便爬虫读取
+
+2、script标签中 async 和 defer 的区别？
+<script></script>  会阻碍HTML解析，只有下载好并执行完脚本才能解析HTML
+<script async></script>   解析HTML的过程中进行脚本的异步下载，有可能会阻断HTML的解析
+<script defer></script>   完全不会阻塞HTML解析，解析完后再按照顺序执行脚本
+
+3、从浏览器输入地址按下回车后发生了什么？
+
+DNS解析（输入网址后，先从浏览器缓存中寻找是否有该网址所对应的ip地址，若没有则去OS系统中查找，路由器DNS缓存查找，ISP缓存
+        如果都没找到，就会向ISP或者公共的域名解析服务发起DNS查找请求） 引申：强缓存，协商缓存 DNS负载均衡
+发起TCP链接 （
+    三次握手：1、客户端发送sync包(Seq = x)到服务器，并进入SYN_SEND状态，并等待服务器确认；
+             2、服务器收到sync包，必须确认客户的SYN（ack=x+1）,并且自己发送一个SYN包（Seq=y），即SYN+ACK包，此时服务器进入SYN_RECV状态；
+             3、客户端收到服务器的SYN_ACK包向服务器发送ACK(ack=y+1),发送完之后，服务器和客户端进入ESTABLISHED状态，完成三次握手。（采用三次握手是为了防止失效的报文突然又传送到服务端，因而产生错误。）
+    四次挥手：1、客户端发送一个FIN包，用来关闭客户端到服务器的数据传送；
+             2、服务器收到FIN包后，发送一个ACK包到客户端，此时服务器进入CLOSE_WAIT(等待关闭)的状态，此时，客户端向服务端的请求已经释放，没有数据发送，但此时服务端向客户端发送，客户端需要接受；
+             3、服务器发送FIN包到客户端，用来关闭服务端到客户端的数据传送；
+             4、客户端收到FIN后，发送一个ack给服务端，服务端收到确认信息后，立即关闭链接，服务器结束TCP的时间要比客户端早一些
+）
+发起http请求（http端口为80/8080,https端口为443
+              发送HTTP请求的过程就是构建HTTP请求报文并通过TCP协议中发送到服务器指定端口，请求报文由请求头， 请求行，请求正文组成；
+              
+              请求行的格式为Method Request-URL HTTP-Version CRLF eg: GET index.html HTTP/1.1 常用的方法有: GET, POST, PUT, DELETE, OPTIONS, HEAD。 引申post和get的区别
+              
+              请求头允许客户端向服务器传递请求的附加信息和客户端自身的信息，请求头中使用Accept，Accept-Encoding, Accept-language,Cache-Control,Connection,Cookie等字段，
+              Accept用于指定客户端接受那些类型的信息，Accept-Encoding类似，用于指定接受的编码方式，Connection设置为keep-alive用于告诉客户端本次HTTP
+              请求结束之后并不需要关闭TCP链接，这样可以使下次HTTP请求使用相同的TCP通道，节省TCP链接建立的时间
+
+              请求正文： 当请求方式为post/put时，请求正文就是客户端向服务器所传递的数据，在请求包头中有一些与请求正文相关的信息，例如: 现在的Web应用通常采用Rest架构，请求的数据格式一般为json。这时就需要设置Content-Type: application/json。
+）
+服务器处理请求并返回http报文
+
+浏览器解析渲染页面
+
+4、get和post的区别？
+get在浏览器回退的时候是无害的，而post会再次提交请求
+get参数会被完整的保存在浏览器历史记录里，而post不会
+get请求有长度限制，而post没有
+post相较于get稍微安全一些，
+get通过url传递参数，post放在请求正文里，
+get只会产生一个tcp数据包，而post会产生两个（
+    对于get方式请求，浏览器会把http header和data一起发送出去，服务器响应200
+    而post显示发送http请求，服务器响应100 continue，浏览器再发送data，服务器响应200
+）
+
+5、http缓存
+http缓存根据缓存规则可分为  强制缓存和协商缓存
+
+强制缓存：客户端首先向缓存数据库请求数据，若数据未失效则返回数据，若数据失效，则向服务器发起请求，服务器返回数据和缓存规则，并将数据和缓存规则存入缓存数据库。
+协商缓存：客户端会从缓存数据库拿到一个缓存标识，然后向服务端询问该标识是否失效，若没有失效，则服务端返回304，这样客户端直接去缓存数据库获取数据，若失效，则服务端返回新数据。
+（协商缓存，如果缓存过期。判断是否有Etag和Last-Modified标识，有的话向服务器发起http请求，带if-None-Match和if-Modified-Since字段，服务器判断缓存是否可用）
+强制缓存优先级高于协商缓存，若两种缓存皆存在，且强制缓存命中目标，则协商缓存不再验证标识
+
+Cache-Control 
+max-age: 缓存最大的过期时间。 例如 Cache-Control: max-age=3153600（单位是秒）
+no-cache: 可以再客户端存储资源，但是必须每次去服务端做新鲜度校验，来决定从服务端获取新资源（200）还是使用客户端缓存（304）
+no-store：永远去服务器获取资源
+
+不同刷新的请求执行过程
+浏览器地址栏中写入URL，回车
+浏览器发现缓存中有这个文件了，不用继续请求了，直接去缓存拿。（最快）
+
+F5
+F5就是告诉浏览器，别偷懒，好歹去服务器看看这个文件是否有过期了。于是浏览器就战战兢兢的发送一个请求带上If-Modify-since。
+
+Ctrl+F5
+告诉浏览器，你先把你缓存中的这个文件给我删了，然后再去服务器请求个完整的资源文件下来。于是客户端就完成了强行更新的操作.
+
+6、回流和重绘
+回流：当页面中某些元素的尺寸、结构、或者某些属性发生改变的时候，浏览器重新渲染部分或全部文档的过程成为回流
+导致回流的操作：页面首次渲染；浏览器窗口大小发生改变；元素尺寸或位置发生改变；元素字体大小发生改变；添加或删除元素；激活伪类
+
+重绘：当页面中元素样式的改变不影响他在文档流中的位置的变化时，浏览器会赋予它新的样式并重新绘制他，这个过程叫重绘
+
+优化：避免使用table布局；
+     尽可能在dom树末端改变css
+     将动画效果应用到position属性为absolute或fixed的元素上；
+     避免使用css表达式，如calc()
+7、Event Loop(事件循环)
+macro-task(宏任务)：包括整体代码script，setTimeout，setInterval
+micro-task(微任务)：Promise，process.nextTick
+
+JS将任务分为同步任务和异步任务， 同步任务直接进入栈中执行，异步任务待同步任务执行完毕后才执行
+除此之外我们还分为宏任务和微任务，当主线程执行栈中的任务全部清空之后，再去找最先入栈的微任务（promise等），清空微任务后再进行下一个微任务，当微任务全部清空之后，再去找最先入栈的宏任务。
+setTimeout(function() {
+    console.log('setTimeout');
+})
+
+new Promise(function(resolve) {
+    console.log('promise');
+    resolve();
+}).then(function() {
+    console.log('then');
+})
+
+console.log('console');
+第一轮
+
+这段代码进入主线程
+遇到setTimeout，将其回调函数注册后分发到宏任务
+
+
+第二轮
+
+遇到Promise，new Promise立即执行（这个不解释，想了解的我后续文章会介绍），输出promise，遇到then，将其分发到微任务
+
+
+第三轮
+
+遇到console.log("console"),直接输出console
+
+
+第四轮
+
+主线程执行栈已经清空，先去微任务看看，执行then函数，输出then
+
+
+第五轮
+
+微任务执行完了，看看宏任务，有个setTimeout，输出setTimeout，整体执行完毕。
+
+8、SSR服务端渲染？
+优点：SSR更利于SEO,还能加快首屏的呈现速度（因为服务端直接返回渲染好的页面html，不用加载js）
+缺点：开发受限，除created和beforeCreated之外的生命钩子不可用。其次，对服务器压力较大
+
+vue SSR核心：vue-server-renderer

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <div class="box"></div>
+        <div class="box"></div>
+        <div class="box"></div>
+        <div class="box1"></div>
+    </div>
+    <!-- <canvas id="myCa" width="200" height="200"></canvas> -->
+    <script>
+       const data = {}
+       let _myName = 'Yimwu'
+       Object.defineProperty(data, 'name', {
+           get: () => {
+               console.log('get')
+               return _myName
+           },
+           set: (newVal) => {
+               console.log('set')
+                _myName = newVal
+           }
+       })
+       console.log(data.name)
+       data.name = 'Mr.Wu'
+       console.log(data.name)
+    </script>
+    <style>
+         .box {
+            flex: 1;
+            width:100px;
+            height:100px;
+            background-color: #eee;
+        }
+        .box1 {
+            background-color: red;
+            flex: 2
+        }
+        .container {
+            display: flex;
+            background:#000;
+        }
+    </style>
+</body>
+</html>
